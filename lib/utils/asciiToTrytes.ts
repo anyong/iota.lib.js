@@ -26,35 +26,35 @@
 //      RESULT:
 //        The ASCII char "Z" is represented as "IC" in trytes.
 //
-function toTrytes(input) {
-
+function toTrytes(input: string): string | null {
     // If input is not a string, return null
-    if ( typeof input !== 'string' ) return null
+    if (typeof input !== 'string') {
+        return null
+    }
 
-    var TRYTE_VALUES = "9ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    var trytes = "";
+    const TRYTE_VALUES = '9ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    let trytes = ''
 
-    for (var i = 0; i < input.length; i++) {
-        var char = input[i];
-        var asciiValue = char.charCodeAt(0);
+    for (let i = 0; i < input.length; i++) {
+        const char = input[i]
+        const asciiValue = char.charCodeAt(0)
 
         // If not recognizable ASCII character, return null
         if (asciiValue > 255) {
-            //asciiValue = 32
-            return null;
+            // asciiValue = 32
+            return null
         }
 
-        var firstValue = asciiValue % 27;
-        var secondValue = (asciiValue - firstValue) / 27;
+        const firstValue = asciiValue % 27
+        const secondValue = (asciiValue - firstValue) / 27
 
-        var trytesValue = TRYTE_VALUES[firstValue] + TRYTE_VALUES[secondValue];
+        const trytesValue = TRYTE_VALUES[firstValue] + TRYTE_VALUES[secondValue]
 
-        trytes += trytesValue;
+        trytes += trytesValue
     }
 
-    return trytes;
+    return trytes
 }
-
 
 //
 //  Trytes to bytes
@@ -65,35 +65,38 @@ function toTrytes(input) {
 //    Last character = }
 //    Everything after that is 9's padding
 //
-function fromTrytes(inputTrytes) {
-
+function fromTrytes(inputTrytes: string): string | null {
     // If input is not a string, return null
-    if ( typeof inputTrytes !== 'string' ) return null
-
-    // If input length is odd, return null
-    if ( inputTrytes.length % 2 ) return null
-
-    var TRYTE_VALUES = "9ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    var outputString = "";
-
-    for (var i = 0; i < inputTrytes.length; i += 2) {
-        // get a trytes pair
-        var trytes = inputTrytes[i] + inputTrytes[i + 1];
-
-        var firstValue = TRYTE_VALUES.indexOf(trytes[0]);
-        var secondValue = TRYTE_VALUES.indexOf(trytes[1]);
-
-        var decimalValue = firstValue + secondValue * 27;
-
-        var character = String.fromCharCode(decimalValue);
-
-        outputString += character;
+    if (typeof inputTrytes !== 'string') {
+        return null
     }
 
-    return outputString;
+    // If input length is odd, return null
+    if (inputTrytes.length % 2) {
+        return null
+    }
+
+    const TRYTE_VALUES = '9ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    let outputString = ''
+
+    for (let i = 0; i < inputTrytes.length; i += 2) {
+        // get a trytes pair
+        const trytes = inputTrytes[i] + inputTrytes[i + 1]
+
+        const firstValue = TRYTE_VALUES.indexOf(trytes[0])
+        const secondValue = TRYTE_VALUES.indexOf(trytes[1])
+
+        const decimalValue = firstValue + secondValue * 27
+
+        const character = String.fromCharCode(decimalValue)
+
+        outputString += character
+    }
+
+    return outputString
 }
 
-module.exports = {
-    toTrytes: toTrytes,
-    fromTrytes: fromTrytes
+export default {
+    toTrytes,
+    fromTrytes,
 }

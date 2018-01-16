@@ -1,0 +1,1 @@
+import { IRICommand } from './types'
