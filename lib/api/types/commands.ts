@@ -1,3 +1,6 @@
+/**
+ * Allowable IRI Commands
+ */
 export enum IRICommand {
     GET_NODE_INFO = 'getNodeInfo',
     GET_NEIGHBORS = 'getNeighbors',
@@ -16,10 +19,16 @@ export enum IRICommand {
     CHECK_CONSISTENCY = 'checkConsistency',
 }
 
+/**
+ * IRI Command objects extend from this interface
+ */
 export interface BaseCommand {
     command: IRICommand
 }
 
+/**
+ * IRI Command objects
+ */
 export interface AttachToTangleCommand extends BaseCommand {
     command: IRICommand.ATTACH_TO_TANGLE
     trunkTransaction: string
@@ -28,43 +37,16 @@ export interface AttachToTangleCommand extends BaseCommand {
     trytes: string[]
 }
 
-export interface FindTransactionsSearchValues {
-    bundles?: string[]
-    addresses?: string[]
-    tags?: string[]
-    approvees?: string[]
-}
-
-export type FindTransactionsSearchKeys = Array<keyof FindTransactionsSearchValues>
-
-export const findTxValidSearchKeys: FindTransactionsSearchKeys = ['bundles', 'addresses', 'tags', 'approvees']
-
-export interface FindTransactionsCommand extends BaseCommand, FindTransactionsSearchValues {
-    command: IRICommand.FIND_TRANSACTIONS
-}
-
-export function isFindTransactions(cmd: BaseCommand): cmd is FindTransactionsCommand {
-    return cmd.command === IRICommand.FIND_TRANSACTIONS
-}
-
 export interface GetBalancesCommand extends BaseCommand {
     command: IRICommand.GET_BALANCES
     addresses: string[]
     threshold: number
 }
 
-export function isGetBalances(cmd: BaseCommand): cmd is GetBalancesCommand {
-    return cmd.command === IRICommand.GET_BALANCES
-}
-
 export interface GetInclusionStatesCommand extends BaseCommand {
     command: IRICommand.GET_INCLUSION_STATES
     transactions: string[]
     tips: string[]
-}
-
-export function isGetInclusionStates(cmd: BaseCommand): cmd is GetInclusionStatesCommand {
-    return cmd.command === IRICommand.GET_INCLUSION_STATES
 }
 
 export interface GetNodeInfoCommand extends BaseCommand {
@@ -100,8 +82,8 @@ export interface GetTrytesCommand extends BaseCommand {
     hashes: string[]
 }
 
-export function isGetTrytes(cmd: BaseCommand): cmd is GetTrytesCommand {
-    return cmd.command === IRICommand.GET_TRYTES
+export interface FindTransactionsCommand extends BaseCommand, FindTransactionsSearchValues {
+    command: IRICommand.FIND_TRANSACTIONS
 }
 
 export interface InterruptAttachingToTangleCommand extends BaseCommand {
@@ -123,6 +105,29 @@ export interface CheckConsistencyCommand extends BaseCommand {
     tails: string[]
 }
 
+/**
+ * Guards to ensure command types
+ */
+
+export function isFindTransactions(cmd: BaseCommand): cmd is FindTransactionsCommand {
+    return cmd.command === IRICommand.FIND_TRANSACTIONS
+}
+
+export function isGetBalances(cmd: BaseCommand): cmd is GetBalancesCommand {
+    return cmd.command === IRICommand.GET_BALANCES
+}
+
+export function isGetInclusionStates(cmd: BaseCommand): cmd is GetInclusionStatesCommand {
+    return cmd.command === IRICommand.GET_INCLUSION_STATES
+}
+
+export function isGetTrytes(cmd: BaseCommand): cmd is GetTrytesCommand {
+    return cmd.command === IRICommand.GET_TRYTES
+}
+
+/**
+ * Extras
+ */
 export type BatchableCommand =
     | FindTransactionsCommand
     | GetBalancesCommand
@@ -138,4 +143,17 @@ export function isBatchableCommand(cmd: BaseCommand): cmd is BatchableCommand {
     )
 }
 
+export interface FindTransactionsSearchValues {
+    bundles?: string[]
+    addresses?: string[]
+    tags?: string[]
+    approvees?: string[]
+}
+
+export type FindTransactionsSearchKeys = Array<keyof FindTransactionsSearchValues>
+
+export const findTxValidSearchKeys: FindTransactionsSearchKeys = ['bundles', 'addresses', 'tags', 'approvees']
+
 export type Callback<R = any> = (err: Error | null, res?: R) => void
+
+export const keysOf = <T>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>

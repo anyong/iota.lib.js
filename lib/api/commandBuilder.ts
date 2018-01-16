@@ -18,7 +18,7 @@ import {
     IRICommand,
     RemoveNeighborsCommand,
     StoreTransactionsCommand,
-} from './types'
+} from './types/commands'
 
 /**
  *   @method attachToTangle

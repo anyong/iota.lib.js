@@ -61,7 +61,7 @@ function batchableKeysOf<T extends BatchableCommand>(cmd: T) {
     return batchableKeys[cmd.command] as Array<keyof T>
 }
 
-export default class Request {
+export default class MakeRequest {
     public constructor(public provider: string = DEFAULT_PROVIDER, public token: string) {}
 
     /**
