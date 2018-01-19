@@ -12,7 +12,15 @@
         "name": "Dominik Schiener (IOTA Foundation)",
         "website": "https://iota.org"
     },
-    "keywords": ["iota", "tangle", "library", "browser", "javascript", "nodejs", "API"],
+    "keywords": [
+        "iota",
+        "tangle",
+        "library",
+        "browser",
+        "javascript",
+        "nodejs",
+        "API"
+    ],
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/iotaledger/iota.lib.js/issues"
