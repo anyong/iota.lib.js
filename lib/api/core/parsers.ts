@@ -1,6 +1,3 @@
-import { GetInclusionStatesResponse } from '../types/response'
-import { getReturnOfExpression } from './foo'
+import { GetInclusionStatesResponse } from '../types/responses'
 
-export function parseGetInclusionStates(res: GetInclusionStatesResponse) {
-    return res.states
-}
+export const parseGetInclusionStates = ({ states }: GetInclusionStatesResponse) => states

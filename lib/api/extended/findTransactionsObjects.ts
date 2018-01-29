@@ -8,7 +8,7 @@
  *   @returns {function} callback
  *   @returns {object} success
  **/
-function findTransactionObjects(input: FindTransactionsSearchValues, callback: Callback<Transaction[]>) {
+export default function findTransactionObjects(input: FindTransactionsSearchValues, callback: Callback<Transaction[]>) {
     this.findTransactions(input, (error, transactions) => {
         if (error) {
             return callback(error)

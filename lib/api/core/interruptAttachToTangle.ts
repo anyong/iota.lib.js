@@ -1,16 +1,22 @@
-import { Callback } from '../types/commands'
-import { InterruptAttachToTangleResponse } from '../types/responses'
+import { API, BaseCommand, Callback,  IRICommand } from '../types'
 
-import commandBuilder from '../commandBuilder'
-import sendCommand from './sendCommand'
+export interface InterruptAttachingToTangleCommand extends BaseCommand {
+    command: IRICommand.INTERRUPT_ATTACHING_TO_TANGLE
+}
+
+export type InterruptAttachingToTangleResponse = void
+
 
 /**
  *   @method interruptAttachingToTangle
  *   @returns {function} callback
  *   @returns {object} success
  **/
-function interruptAttachingToTangle(callback: Callback<InterruptAttachToTangleResponse>) {
-    const command = commandBuilder.interruptAttachingToTangle()
-
-    return sendCommand(command, callback)
+export default function interruptAttachingToTangle(this: API, callback?: Callback<void>): Promise<void> {
+    return this.sendCommand<InterruptAttachingToTangleCommand, InterruptAttachingToTangleResponse>(
+        { 
+            command: IRICommand.INTERRUPT_ATTACHING_TO_TANGLE
+        },
+        callback
+    )
 }
