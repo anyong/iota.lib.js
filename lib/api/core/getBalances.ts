@@ -1,6 +1,5 @@
 import errors from '../../errors'
-import inputValidator from '../../utils/inputValidator'
-import Utils from '../../utils/utils'
+import { isArrayOfHashes, noChecksum } from '../../utils'
 
 import { API, BaseCommand, Callback, IRICommand } from '../types'
 
@@ -30,28 +29,28 @@ export default function getBalances(
     this: API,
     addresses: string[],
     threshold: number,
-    callback: Callback<GetBalancesResponse>): Promise<GetBalancesResponse> {
+    callback?: Callback<GetBalancesResponse>): Promise<GetBalancesResponse> {
 
     const promise: Promise<GetBalancesResponse> = new Promise((resolve, reject) => {
         // Check if correct transaction hashes
-        if (!inputValidator.isArrayOfHashes(addresses)) {
+        if (!isArrayOfHashes(addresses)) {
             reject(errors.INVALID_TRYTES)
         } else {
             resolve(
                 this.sendCommand<GetBalancesCommand, GetBalancesResponse>(
                     {
                         command: IRICommand.GET_BALANCES,
-                        addresses: addresses.map(address => Utils.noChecksum(address)),
+                        addresses: addresses.map(address => noChecksum(address)),
                         threshold,
                     }
-                ).then(
+                )/*.then(
                     res => (
                         {
                             ...res,
-                            balances: res.balances.map(balance => parseInt(balance, 10)
+                            balances: res.balances.map(balance => parseInt(balance, 10))
                         }
                     )
-                )
+                )*/
             )
         }
     })

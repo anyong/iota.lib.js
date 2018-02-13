@@ -30,9 +30,9 @@ export default function attachToTangle(
     branchTransaction: string,
     minWeightMagnitude: number,
     trytes: string[],
-    callback?: Callback<string[] | void>): Promise<string[] | void> {
+    callback?: Callback<string[]>): Promise<string[]> {
         
-    const promise: Promise<string[] | void> = new Promise((resolve, reject) => {
+    const promise: Promise<string[]> = new Promise((resolve, reject) => {
         // Check if correct hash
         if (!isHash(trunkTransaction)) {
             return reject(errors.INVALID_TRUNK_TRANSACTION)

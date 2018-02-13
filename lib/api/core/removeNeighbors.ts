@@ -16,15 +16,15 @@ export interface RemoveNeighborsResponse {
 /**
  *   @method removeNeighbors
  *   @param {Array} uris List of URI's
- *   @returns {function} callback
+ *   @param {function} callback
  *   @returns {object} success
  **/
 export default function removeNeighbors(
     this: API, 
     uris: string[],
-    callback?: Callback<number | void>): Promise<number | void> {
+    callback?: Callback<number>): Promise<number> {
         
-    const promise: Promise<number | void> = new Promise((resolve, reject) => {
+    const promise: Promise<number> = new Promise((resolve, reject) => {
         if (uris.some(uri => !isUri(uri))) {
             reject(new Error(errors.INVALID_URI))
         }

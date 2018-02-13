@@ -13,7 +13,6 @@ export interface AddNeighborsResponse {
     duration: number
 }
 
-
 /**
  *   @method addNeighbors
  *   @param {Array} uris List of URI's
@@ -22,9 +21,9 @@ export interface AddNeighborsResponse {
 export default function addNeighbors(
     this: API,
     uris: string[],
-    callback?: Callback<number | void>): Promise<number | void> {
+    callback?: Callback<number>): Promise<number> {
     
-    const promise: Promise<number | void> = new Promise((resolve, reject) => {
+    const promise: Promise<number> = new Promise((resolve, reject) => {
         if (!uris.every(uri => isUri(uri))) {
             reject(new Error(errors.INVALID_URI))
         }

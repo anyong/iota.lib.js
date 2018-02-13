@@ -14,14 +14,15 @@ export interface GetTipsResponse {
  *   @returns {function} callback
  *   @returns {object} success
  **/
-export default function getTips(this: API, callback?: Callback<string[] | void>): Promise<string[] | void> {
-  const promise: Promise<string[] | void> = new Promise((resolve, reject) => { 
+export default function getTips(this: API, callback?: Callback<string[]>): Promise<string[]> {
+  const promise: Promise<string[]> = new Promise((resolve, reject) => {
       resolve(
           this.sendCommand<GetTipsCommand, GetTipsResponse>(
               {
                   command: IRICommand.GET_TIPS
               }
-          ).then(res => res.hashes)
+          )
+              .then(res => res.hashes)
       )        
   })
 

@@ -16,9 +16,9 @@ export interface GetNeighborsResponse {
  **/
 export default function getNeighbors(
     this: API,
-    callback?: Callback<Neighbors | void>): Promise<Neighbors | void> {
+    callback?: Callback<Neighbors>): Promise<Neighbors> {
         
-    const promise: Promise<Neighbors | void> = new Promise((resolve, reject) =>
+    const promise: Promise<Neighbors> = new Promise((resolve, reject) =>
         resolve(
             this.sendCommand<GetNeighborsCommand, GetNeighborsResponse>(
                 {

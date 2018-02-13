@@ -25,9 +25,9 @@ export default function getTransactionsToApprove(
     this: API,
     depth: number,
     reference?: string,
-    callback?: Callback<GetTransactionsToApproveResponse | void>): Promise<GetTransactionsToApproveResponse | void> {
+    callback?: Callback<GetTransactionsToApproveResponse>): Promise<GetTransactionsToApproveResponse> {
 
-      const promise: Promise<GetTransactionsToApproveResponse | void> = new Promise((resolve, reject) => {
+      const promise: Promise<GetTransactionsToApproveResponse> = new Promise((resolve, reject) => {
 
         if (!Number.isInteger(depth)) {
             reject(new Error(errors.INVALID_DEPTH))

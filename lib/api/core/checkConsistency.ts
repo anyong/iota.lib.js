@@ -12,9 +12,18 @@ export interface CheckConsistencyResponse {
     state: boolean
 }
 
-export default function checkConsistency (this: API, transactions: string[], callback?: Callback<boolean | void>): Promise<boolean | void> {
-    const promise: Promise<boolean | void> = new Promise((resolve, reject) => {
-        if (!isArrayOfHashes(transactions)) {
+export default function checkConsistency (
+    this: API,
+    transactions: string | string[],
+    callback?: Callback<boolean>
+): Promise<boolean> {
+
+    if (!Array.isArray(transactions)) {
+      transactions = [transactions]
+    }
+
+    const promise: Promise<boolean> = new Promise((resolve, reject) => {
+        if (!isArrayOfHashes(transactions as string[])) {
             return reject(new Error(errors.INVALID_TRYTES))
         }
         resolve(

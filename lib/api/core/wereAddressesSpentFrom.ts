@@ -15,9 +15,10 @@ export interface WereAddressesSpentFromResponse {
 export default function wereAddressesSpentFrom (
     this: API,
     addresses: string[] | string,
-    callback?: Callback<boolean[] | void>): Promise<boolean[] | void> {
+    callback?: Callback<boolean[]>
+): Promise<boolean[]> {
         
-    const promise: Promise<boolean[] | void> = new Promise((resolve, reject) => {
+    const promise: Promise<boolean[]> = new Promise((resolve, reject) => {
         if (!Array.isArray(addresses)) {
             addresses = [addresses]
         }

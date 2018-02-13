@@ -18,8 +18,8 @@ export interface GetTrytesResponse {
  *   @returns {function} callback
  *   @returns {object} success
  **/
-export default function getTrytes (this: API, hashes: string[], callback?: Callback<string[] | void>): Promise<string[] | void> {
-    const promise: Promise<string[] | void> = new Promise((resolve, reject) => {
+export default function getTrytes (this: API, hashes: string[], callback?: Callback<string[]>): Promise<string[]> {
+    const promise: Promise<string[]> = new Promise((resolve, reject) => {
         if (!isArrayOfHashes(hashes)) {
             reject(new Error(errors.INVALID_TRYTES))
         }

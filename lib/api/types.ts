@@ -5,7 +5,7 @@ import {
     GetNeighborsResponse,
     GetNodeInfoResponse,
     GetTransactionsToApproveResponse,
-    GetTrytesCommand
+    GetTrytesCommand,
 } from './core'
 
 /**
@@ -132,7 +132,7 @@ export interface BaseCommand {
  * Connection settings object
  */
 export interface Settings {
-    provider?: string
+    provider: string
     token?: string // -> sandboxToken
     host?: string // deprecate
     port?: number // deprecate
@@ -148,10 +148,16 @@ export type Callback<R = any> = (err: Error | null, res?: R) => void
  * API, Core + Extended
  */
 export interface API {
+    /**
+     * API util methods
+     */
     getSettings: () => Settings
     
     setSettings: (settings: Settings) => API
-    
+
+    /**
+     * Core API methods
+     */
     sendCommand: <C extends BaseCommand, R = any>(
         this: API,
         command: BaseCommand,
@@ -170,57 +176,60 @@ export interface API {
     findTransactions: (
         this: API,
         query: FindTransactionsQuery,
-        callback?: Callback<string[] | void>
-    ) => Promise<string[] | void>
+        callback?: Callback<string[]>
+    ) => Promise<string[]>
       
     getBalances: (
         this: API,
         addresses: string[],
-        callback?: Callback<GetBalancesResponse | void>
-    )  => Promise<GetBalancesResponse | void> 
+        threshold: number,
+        callback?: Callback<GetBalancesResponse>
+    )  => Promise<GetBalancesResponse>
         
     getInclusionStates: (
         this: API,
         transactions: string[],
         tips: string[],
-        callback?: Callback<string[] | void>
-    ) => Promise<string[] | void>
+        callback?: Callback<string[]>
+    ) => Promise<string[]>
         
     getNodeInfo: (
         this: API,
-        callback?: Callback<GetNodeInfoResponse | void>
-    ) => Promise<GetNodeInfoResponse | void>
+        callback?: Callback<GetNodeInfoResponse>
+    ) => Promise<GetNodeInfoResponse>
         
     getNeighbors: (
         this: API,
-        callback?: Callback<GetNeighborsResponse | void>
-    ) => Promise<Neighbor[] | void> 
+        callback?: Callback<GetNeighborsResponse>
+    ) => Promise<Neighbor[]>
         
     addNeighbors: (
         this: API,
-        callback?: Callback<number | void>
-    ) => Promise<number | void>
+        callback?: Callback<number>
+    ) => Promise<number>
         
     removeNeighbors: (
         this: API,
-        callback?: Callback<number | void>
-    ) => Promise<number | void> 
+        callback?: Callback<number>
+    ) => Promise<number>
         
     getTips: (
         this: API,
-        callback?: Callback<string[] | void>
-    ) => Promise<string[] | void> 
+        callback?: Callback<string[]>
+    ) => Promise<string[]>
         
     getTransactionsToApprove: (
         this: API,
-        callback?: Callback<GetTransactionsToApproveResponse | void>
-    ) => Promise<GetTransactionsToApproveResponse | void>
+        depth: number,
+        reference?: string,
+        callback?: Callback<GetTransactionsToApproveResponse>
+    ) => Promise<GetTransactionsToApproveResponse>
         
     getTrytes: (
         this: API,
         hashes: string[],
-        callback?: Callback<string[] | void>
-    ) => Promise<string[] | void>
+        callback?: Callback<string[]>
+    ) => Promise<string[]>
         
     interruptAttachingToTangle: (
         this: API,
@@ -229,15 +238,9 @@ export interface API {
         
     checkConsistency: (
         this: API,
-        transactions: string[],
-        callback?: Callback<boolean | void>
-    ) => Promise<boolean | void>
-
-    isPromotable: (
-        this: API,
-        transactions: string[],
-        callback?: Callback<boolean | void>
-    ) => Promise<boolean | void>
+        transactions: string | string[],
+        callback?: Callback<boolean>
+    ) => Promise<boolean>
         
     broadcastTransactions: (
         this: API,

@@ -28,7 +28,7 @@ export interface GetNodeInfoResponse {
  *   @returns {function} callback
  *   @returns {object} success
  **/
-export default function getNodeInfo(this: API, callback?: Callback<GetNodeInfoResponse | void>): Promise<GetNodeInfoResponse | void> {
+export default function getNodeInfo(this: API, callback?: Callback<GetNodeInfoResponse>): Promise<GetNodeInfoResponse> {
     return this.sendCommand<GetNodeInfoCommand, GetNodeInfoResponse>(
         {
             command: IRICommand.GET_NODE_INFO

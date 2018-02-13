@@ -25,9 +25,9 @@ export default function getInclusionStates(
     this: API,
     transactions: string[], 
     tips: string[], 
-    callback?: Callback<boolean[] | void>): Promise<boolean[] | void> {
+    callback?: Callback<boolean[]>): Promise<boolean[]> {
 
-    const promise = new Promise<boolean[] | void>((resolve, reject) => {
+    const promise = new Promise<boolean[]>((resolve, reject) => {
         if (!isArrayOfHashes(transactions)) {
             return reject(errors.INVALID_TRYTES)
         }

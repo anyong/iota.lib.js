@@ -19,7 +19,7 @@ import sendCommand from './sendCommand'
  *   @returns {object} success
  **/
 export default function storeTransactions(
-    this: any, 
+    this: API,
     trytes: string[], 
     callback?: Callback<void>): Promise<void> {
 

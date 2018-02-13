@@ -34,11 +34,11 @@ const keysOf = <T>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>
 export default function findTransactions(
     this: API,
     query: FindTransactionsQuery,
-    callback?: Callback<string[] | void>): Promise<string[] | void> {
+    callback?: Callback<string[]>): Promise<string[]> {
 
     const validKeys = ['bundles', 'addresses', 'tags', 'approvees']
 
-    const promise: Promise<string[] | void> = new Promise((resolve, reject) => { 
+    const promise: Promise<string[]> = new Promise((resolve, reject) => {
         if (keysOf(query).some(key => validKeys.indexOf(key) === -1 || !Array.isArray(query[key]))) {
             return reject(new Error(errors.INVALID_SEARCH_KEYS))
         }
