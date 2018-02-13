@@ -1,3 +1,7 @@
+import errors from '../../errors'
+
+import { API, Bundle, Callback, Transfer } from '../types'
+
 /**
  *   Prepares Transfer, gets transactions to approve
  *   attaches to Tangle, broadcasts and stores
@@ -13,18 +17,15 @@
  *   @param {function} callback
  *   @returns {object} analyzed Transaction objects
  **/
-function sendTransfer(
+export default function sendTransfer(
+    this: API,
     seed: string,
     depth: number,
     minWeightMagnitude: number,
     transfers: Transfer[],
-    options: any,
-    callback: Callback
-) {
-    // Validity check for number of arguments
-    if (arguments.length < 5) {
-        return callback(new Error('Invalid number of arguments'))
-    }
+    options?: any,
+    callback?: Callback<Bundle>
+): Promise<Bundle> {
 
     // If no options provided, switch arguments
     if (arguments.length === 5 && Object.prototype.toString.call(options) === '[object Function]') {
@@ -32,16 +33,27 @@ function sendTransfer(
         options = {}
     }
 
-    // Check if correct depth and minWeightMagnitude
-    if (!inputValidator.isValue(depth) || !inputValidator.isValue(minWeightMagnitude)) {
-        return callback(errors.invalidInputs())
-    }
-
-    this.prepareTransfers(seed, transfers, options, (error, trytes) => {
-        if (error) {
-            return callback(error)
+    const promise: Promise<Bundle> = new Promise((resolve, reject) => {
+        if (!Number.isInteger(depth)) {
+            return reject(errors.INVALID_DEPTH)
         }
 
-        this.sendTrytes(trytes, depth, minWeightMagnitude, options, callback)
+        if (!Number.isInteger(minWeightMagnitude)) {
+            return reject(errors.INVALID_MIN_WEIGHT_MAGNITUDE)
+        }
+
+        resolve(
+            // 1. Prepare transfers: Check balances & inputs, sign and return the transaction trytes
+            this.prepareTransfers(seed, transfers, options)
+           
+                // 2. Attach transactions to tangle
+                .then((trytes: string[]) => this.sendTrytes(trytes, depth, minWeightMagnitude, options))
+        )
     })
+
+    if (typeof callback === 'function') {
+        promise.then(callback.bind(null, null), callback)
+    }
+
+    return promise
 }

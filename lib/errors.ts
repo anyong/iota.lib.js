@@ -27,7 +27,7 @@ export default {
   /**
    * @constant {string} INVALID_SECURITY - Invalid security
    */
-  INVALID_SECURITY: 'Invalid security option',
+  INVALID_SECURITY_LEVEL: 'Invalid security option',
 
   /**
    * @constant {string} INVALID_CHECKSUM - Invalid checksum
@@ -98,7 +98,11 @@ export default {
    * @constant {string} INCONSISTENT_SUBTANGLE - Inconsistent subtangle
    */
   INCONSISTENT_SUBTANGLE: 'Inconsistent subtangle',
-  
+
+  /**
+   * @constant {string} INVALID_BUNDLE - Invalid bundle
+   */
+  INVALID_BUNDLE: 'Invalid bundle',
 
   /**
    * @constant {string} INVALID_BUNDLE_HASH - Invalid bundle hash
@@ -118,5 +122,10 @@ export default {
   /**
    * @const {string} ILLEGAL_LENGTH - Illegal trits length
    */
-  ILLEGAL_LENGTH: 'Illegal trits length'
+  ILLEGAL_LENGTH: 'Illegal trits length',
+
+  /**
+   * @const {string} INSUFFICIENT_BALANCE
+   */
+  INSUFFICIENT_BALANCE: 'Insufficient balance'
 }

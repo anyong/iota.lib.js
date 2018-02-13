@@ -1,28 +1,40 @@
+import errors from '../../errors'
+import { isBundle, isHash } from '../../utils'
+
+import { API, Bundle, Callback, Transaction } from '../types' 
+
 /**
- *   Gets the associated bundle transactions of a single transaction
- *   Does validation of signatures, total sum as well as bundle order
+ *   Gets and validates the bundle of a given the tail transaction.
  *
  *   @method getBundle
  *   @param {string} transaction Hash of a tail transaction
  *   @returns {list} bundle Transaction objects
  **/
-function getBundle(transaction: string, callback: Callback<Transaction[]>) {
-    // inputValidator: Check if correct hash
-    if (!inputValidator.isHash(transaction)) {
-        return callback(errors.invalidInputs(transaction))
+export default function getBundle(
+    this: API,
+    tailTransaction: string,
+    callback?: Callback<Bundle[]>
+): Promise<Bundle> {
+
+    const promise: Promise<Bundle> = new Promise((resolve, reject) => {
+        if (!isHash(tailTransaction)) {
+            return reject(errors.INVALID_INPUTS)
+        }
+
+        resolve(
+            this.traverseBundle(tailTransaction, null, [])
+                .then((bundle: Bundle) => {
+                    if (!isBundle(bundle)) {
+                        return reject(errors.INVALID_BUNDLE)
+                    }
+                    resolve(bundle)
+                })
+        )
+    })
+   
+    if (typeof callback === 'function') {
+        promise.then(callback.bind(null, null), callback)
     }
 
-    // Initiate traverseBundle
-    this.traverseBundle(transaction, null, Array(), (error, bundle) => {
-        if (error) {
-            return callback(error)
-        }
-
-        if (!Utils.isBundle(bundle)) {
-            return callback(new Error('Invalid Bundle provided'))
-        } else {
-            // Return bundle element
-            return callback(null, bundle)
-        }
-    })
+    return promise
 }

@@ -1,5 +1,7 @@
 import BigNumber from 'bignumber.js'
 
+import errors from '../errors'
+
 import { Converter, Curl, Kerl, Signing } from '../crypto'
 
 import ascii from './asciiToTrytes'
@@ -21,7 +23,7 @@ enum Unit {
  *   Table of IOTA Units based off of the standard System of Units
  **/
 export const unitMap = {
-    i: { val: new BigNumber(10).pow(0), dp: 0 },
+    i:  { val: new BigNumber(10).pow(0), dp: 0 },
     Ki: { val: new BigNumber(10).pow(3), dp: 3 },
     Mi: { val: new BigNumber(10).pow(6), dp: 6 },
     Gi: { val: new BigNumber(10).pow(9), dp: 9 },
@@ -165,15 +167,15 @@ export function isValidChecksum(addressWithChecksum: string) {
  *   @param {string} trytes
  *   @returns {String} transactionObject
  **/
-export function transactionObject(trytes: string): Transaction | null {
+export function transactionObject(trytes: string): Transaction {
     if (!trytes) {
-        return null
+        throw new Error(errors.INVALID_TRYTES)
     }
 
     // validity check
     for (let i = 2279; i < 2295; i++) {
         if (trytes.charAt(i) !== '9') {
-            return null
+            throw new Error(errors.INVALID_TRYTES)
         }
     }
 

@@ -1,101 +1,134 @@
+import errors from '../../errors'
+import { isTrytes } from '../../utils'
+
+import {
+    API,
+    Bundle,
+    Callback,
+    GetBalancesResponse,
+    Input,
+    Transaction
+} from '../types'
+
+/**
+ * Account data object
+ */
+export interface AccountData {
+    addresses: string[]
+    inputs: Input[]
+    transfers: Transaction[]
+    latestAddress: string
+    balance: number
+}
+
+export interface GetAccountDataOptions {
+    start?: number
+    end?: number
+    security?: number
+}
+
 /**
  *   Similar to getTransfers, just that it returns additional account data
  *
  *   @method getAccountData
  *   @param {string} seed
  *   @param {object} options
- *       @property {int} start Starting key index
- *       @property {int} security security level to be used for getting inputs and addresses
- *       @property {int} end Ending key index
+ *   @param {int} [options.start=0] - Starting key index
+ *   @param {int} [options.security=0] - Security level to be used for getting inputs and addresses
+ *   @param {int} [options.end] - Ending key index
  *   @param {function} callback
  *   @returns {object} success
- **/
-function getAccountData(seed: string, options: GetAccountDataOptions, callback: Callback) {
-    // inputValidator: Check if correct seed
-    if (!inputValidator.isTrytes(seed)) {
-        return callback(errors.invalidSeed())
-    }
+ */
+export default function getAccountData(
+    this: API,
+    seed: string,
+    {
+        start = 0,
+        end,
+        security = 2
+    }: GetAccountDataOptions = {},
+    callback: Callback<AccountData | void>
+): Promise<AccountData | void> {
 
-    const start = options.start || 0
-    const end = options.end || null
-    const security = options.security || 2
-
-    // If start value bigger than end, return error
-    // or if difference between end and start is bigger than 1000 keys
-    if (end && (start > end || end > start + 1000)) {
-        return callback(new Error('Invalid inputs provided'))
-    }
-
-    //  These are the values that will be returned to the original caller
-    //  @latestAddress: latest unused address
-    //  @addresses:     all addresses associated with this seed that have been used
-    //  @transfers:     all sent / received transfers
-    //  @inputs:        all inputs of the account
-    //  @balance:       the confirmed balance
-    const valuesToReturn = {
-        latestAddress: '',
-        addresses: [],
-        transfers: [],
-        inputs: [],
-        balance: 0,
-    }
-
-    // first call findTransactions
-    // If a transaction is non tail, get the tail transactions associated with it
-    // add it to the list of tail transactions
-    const addressOptions: GetNewAddressOptions = {
-        index: start,
-        total: end && end - start,
-        returnAll: true,
-        security,
-    }
-
-    //  Get a list of all addresses associated with the users seed
-    this.getNewAddress(seed, addressOptions, (error, addresses) => {
-        if (error) {
-            return callback(error)
+    const promise: Promise<AccountData | void> = new Promise((resolve, reject) => {
+        if (!isTrytes(seed)) {
+            return reject(errors.INVALID_SEED)
         }
 
-        // assign the last address as the latest address
-        // since it has no transactions associated with it
-        valuesToReturn.latestAddress = addresses[addresses.length - 1]
+        // Reject if start value bigger than end,
+        // or if difference between end and start is bigger than 1000 key indexes
+        if (end && (start > end || end > start + 1000)) {
+            return reject(errors.INVALID_INPUTS)
+        }
 
-        // Add all returned addresses to the lsit of addresses
-        // remove the last element as that is the most recent address
-        valuesToReturn.addresses = addresses.slice(0, -1)
+        //  These are the values that will be returned to the original caller
+        //  - latestAddress: latest unused address
+        //  - addresses:     all addresses associated with this seed that have been used
+        //  - transfers:     all sent / received transfers
+        //  - inputs:        all inputs of the account
+        //  - balance:       the confirmed balance
+        const accountData: AccountData = {
+            latestAddress: '',
+            addresses: [],
+            transfers: [],
+            inputs: [],
+            balance: 0,
+        }
 
-        // get all bundles from a list of addresses
-        this._bundlesFromAddresses(addresses, true, (bundlesError, bundles) => {
-            if (bundlesError) {
-                return callback(bundlesError)
-            }
-
-            // add all transfers
-            valuesToReturn.transfers = bundles
-
-            // Get the correct balance count of all addresses
-            this.getBalances(valuesToReturn.addresses, 100, (balancesError, balances) => {
-                if (balancesError) {
-                    return callback(balancesError)
-                }
-
-                balances.balances.forEach((balance: number, index: number) => {
-                    valuesToReturn.balance += balance
-
-                    if (balance > 0) {
-                        const newInput = {
-                            address: valuesToReturn.addresses[index],
-                            keyIndex: index,
-                            security,
-                            balance,
-                        }
-
-                        valuesToReturn.inputs.push(newInput)
-                    }
-                })
-
-                return callback(null, valuesToReturn)
+        // 1. Get all addresses associated with the seed
+        resolve(
+            this.getNewAddress(seed, {
+                index: start,
+                total: end ? end - start : undefined,
+                returnAll: true,
+                security,
             })
-        })
+
+                .then((addresses: string[] | string) => {
+
+                    // 2. Assign the last address as the latest address
+                    accountData.latestAddress = addresses[addresses.length - 1]
+
+                    // 3. Add all returned addresses to the list of addresses
+                    // remove the last element as that is the most recent address
+                    accountData.addresses = (addresses as string[]).slice(0, -1)
+
+                    // 4. Get bundles associated with all addresses
+                    this.getbundlesFromAddresses(addresses, true)
+                        .then((bundles: Transaction[]) => {
+
+                          // Add bundles to account data
+                          accountData.transfers = bundles
+
+                            // 5. Get balances for all addresses
+                            this.getBalances(accountData.addresses, 100)
+                                .then((balances: GetBalancesResponse) => {
+                                    (balances.balances as string[])
+                                        .map((balance: string) => parseInt(balance, 10))
+                                        .forEach((balance: number, index: number) => {
+                                            accountData.balance += balance
+
+                                            // 6. Mark all addresses with balance as inputs
+                                            if (balance > 0) {
+                                                accountData.inputs.push(
+                                                    {
+                                                      address: accountData.addresses[index],
+                                                      keyIndex: index,
+                                                      security,
+                                                      balance,
+                                                    }
+                                                )
+                                            }
+                                        })
+                                })
+                      })
+                })
+        )
     })
+
+    if (typeof callback === 'function') {
+      promise.then(callback.bind(null, null), callback)
+    }
+
+    return promise
 }

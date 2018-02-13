@@ -1,21 +1,14 @@
+import { API, Callback } from '../types'
+
 /**
- * Wraps {checkConsistency} in a promise so that its value is returned
+ *  @method isPromotable
+ *  @deprecated
+ *  @alias checkConsistency
  */
-function isPromotable(tail: string) {
-    // Check if is hash
-    if (!inputValidator.isHash(tail)) {
-        return Promise.resolve(false)
-    }
-
-    const command = apiCommands.checkConsistency([tail])
-
-    return new Promise((res, rej) => {
-        this.sendCommand(command, (err, isConsistent) => {
-            if (err) {
-                rej(err)
-            }
-
-            res(isConsistent.state)
-        })
-    })
-}
+export default function isPromotable(
+    this: API,
+    transactions: string | string[],
+    callback?: Callback<boolean>
+): Promise<boolean> {
+    return this.checkConsistency(transactions, callback)
+} 

@@ -1,3 +1,7 @@
+import errors from '../../errors'
+import { isHash, transactionTrytes } from '../../utils'
+
+import { API, Bundle, Callback } from '../types'
 /**
  *   Replays a transfer by doing Proof of Work again
  *
@@ -8,29 +12,45 @@
  *   @param {function} callback
  *   @returns {object} analyzed Transaction objects
  **/
-function replayBundle(tail: string, depth: number, minWeightMagnitude: number, callback: Callback) {
-    // Check if correct tail hash
-    if (!inputValidator.isHash(tail)) {
-        return callback(errors.invalidTrytes())
-    }
+export default function replayBundle(
+    this: API,
+    tail: string,
+    depth: number,
+    minWeightMagnitude: number,
+    callback?: Callback<Bundle>
+): Promise<Bundle> {
 
-    // Check if correct depth and minWeightMagnitude
-    if (!inputValidator.isValue(depth) || !inputValidator.isValue(minWeightMagnitude)) {
-        return callback(errors.invalidInputs())
-    }
-
-    this.getBundle(tail, (error, bundle) => {
-        if (error) {
-            return callback(error)
+    const promise: Promise<Bundle> = new Promise((resolve, reject) => {
+        // Check if correct tail hash
+        if (!isHash(tail)) {
+            reject(errors.INVALID_TRYTES)
         }
 
-        // Get the trytes of all the bundle objects
-        const bundleTrytes: string[] = []
+        // Check if correct depth and minWeightMagnitude
+        if (!Number.isInteger(depth)) {
+          return reject(errors.INVALID_DEPTH)
+        }
+        
+        if (!Number.isInteger(minWeightMagnitude)) {
+            return reject(errors.INVALID_MIN_WEIGHT_MAGNITUDE)
+        }
 
-        bundle!.forEach(bundleTx => {
-            bundleTrytes.push(Utils.transactionTrytes(bundleTx))
-        })
-
-        return this.sendTrytes(bundleTrytes.reverse(), depth, minWeightMagnitude, {}, callback)
+        resolve(
+            this.getBundle(tail)
+                .then((bundle: Bundle) => this.sendTrytes(
+                    bundle
+                        .map(transaction => transactionTrytes(transaction))
+                        .reverse(),
+                    depth,
+                    minWeightMagnitude,
+                    {}
+                ))
+        )
     })
+
+    if (typeof callback === 'function') {
+        promise.then(callback.bind(null, null), callback)
+    }
+
+    return promise
 }

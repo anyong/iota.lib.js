@@ -1,3 +1,7 @@
+import { transactionObject } from '../../utils'
+
+import { API, Bundle, Callback, Transaction } from  '../types'
+
 /**
  *   Basically traverse the Bundle by going down the trunkTransactions until
  *   the bundle hash of the transaction is no longer the same. In case the input
@@ -9,53 +13,63 @@
  *   @param {array} bundle List of bundles to be populated
  *   @returns {array} bundle Transaction objects
  **/
-function traverseBundle(trunkTx: string, bundleHash: string | null, bundle: Transaction[], callback: Callback) {
-    // Get trytes of transaction hash
-    this.getTrytes(Array(trunkTx), (error, trytesList) => {
-        if (error) {
-            return callback(error)
-        }
+export default function traverseBundle(
+    this: API,
+    trunkTransaction: string,
+    bundleHash: string | null,
+    bundle: Bundle,
+    callback?: Callback<Bundle>
+): Promise<Bundle> {
 
-        const trytes = trytesList![0]
+    const promise: Promise<Bundle> = new Promise((resolve, reject) => {
+        // Get trytes of transaction hash
+        this.getTrytes([trunkTransaction])
+            .then((trytes: string[]) => {
+                if (!trytes) {
+                    return reject('Bundle transactions not visible')
+                }
 
-        if (!trytes) {
-            return callback(new Error('Bundle transactions not visible'))
-        }
+                // get the transaction object
+                const transaction: Transaction = transactionObject(trytes[0]) 
 
-        // get the transaction object
-        const txObject = Utils.transactionObject(trytes)
+                if (!transaction) {
+                    return reject('Invalid trytes, could not create object')
+                }
 
-        if (!txObject) {
-            return callback(new Error('Invalid trytes, could not create object'))
-        }
+                // If first transaction to search is not a tail, return error
+                if (!bundleHash && transaction.currentIndex !== 0) {
+                    return reject('Invalid tail transaction supplied.')
+                }
 
-        // If first transaction to search is not a tail, return error
-        if (!bundleHash && txObject.currentIndex !== 0) {
-            return callback(new Error('Invalid tail transaction supplied.'))
-        }
+                // If no bundle hash, define it
+                if (!bundleHash) {
+                    bundleHash = transaction.bundle
+                }
 
-        // If no bundle hash, define it
-        if (!bundleHash) {
-            bundleHash = txObject.bundle
-        }
+                // If different bundle hash, return with bundle
+                if (bundleHash !== transaction.bundle) {
+                    return resolve(bundle)
+                }
 
-        // If different bundle hash, return with bundle
-        if (bundleHash !== txObject.bundle) {
-            return callback(null, bundle)
-        }
+                // If only one bundle element, return
+                if (transaction.lastIndex === 0 && transaction.currentIndex === 0) {
+                    return resolve([transaction])
+                }
 
-        // If only one bundle element, return
-        if (txObject.lastIndex === 0 && txObject.currentIndex === 0) {
-            return callback(null, Array(txObject))
-        }
+                // Define new trunkTransaction for search
+                const nextTrunkTransaction = transaction.trunkTransaction
 
-        // Define new trunkTransaction for search
-        const newTrunkTx = txObject.trunkTransaction
+                // Add transaction object to bundle
+                bundle.push(transaction)
 
-        // Add transaction object to bundle
-        bundle.push(txObject)
-
-        // Continue traversing with new trunkTx
-        return this.traverseBundle(newTrunkTx, bundleHash, bundle, callback)
+                // Continue traversing with new trunkTx
+                return this.traverseBundle(nextTrunkTransaction, bundleHash, bundle)
+            })
     })
+
+    if (typeof callback === 'function') {
+        promise.then(callback.bind(null, null), callback)
+    }
+
+    return promise
 }

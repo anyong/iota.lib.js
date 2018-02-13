@@ -8,6 +8,15 @@ import {
     GetTrytesCommand,
 } from './core'
 
+import {
+    AccountData, GetAccountDataOptions,
+    GetInputsOptions,
+    GetNewAddressOptions,
+    GetTransfersOptions,
+    Inputs,
+    PromoteTransactionOptions
+} from './extended'
+
 /**
  * Export types of public API properties
  */
@@ -20,6 +29,16 @@ export {
     GetTransactionsToApproveResponse,
     GetTrytesCommand
 } from './core'
+
+export {
+    AccountData, GetAccountDataOptions,
+    GetInputsOptions,
+    GetNewAddressOptions,
+    GetTransfersOptions,
+    Inputs,
+    PromoteTransactionOptions
+} from './extended'
+
 
 /** 
  * Input type 
@@ -39,7 +58,7 @@ export interface Transfer {
     value: number
     message: string
     tag: string
-    obsoleteTag: string
+    obsoleteTag?: string
 }
 
 /** 
@@ -63,6 +82,11 @@ export interface Transaction {
     attachmentTimestampUpperBound: number
     nonce: string
 }
+
+/**
+ * Bundle object
+ */
+export type Bundle = Transaction[]
 
 /**
  * Neighbor object 
@@ -257,8 +281,125 @@ export interface API {
     wereAddressesSpentFrom: (
         this: API,
         addresses: string[],
-        callback?: Callback<boolean[] | void>
-    ) => Promise<boolean[] | void>
-      
+        callback?: Callback<boolean[]>
+    ) => Promise<boolean[]>
+
+    /**
+     * Extended API methods
+     */
+    broadcastBundle: (
+        this: API,
+        tailTransaction: string,
+        callback?: Callback<void>
+    ) => Promise<void>
+
+    findTransactionObjects: (
+        this: API,
+        query: FindTransactionsQuery,
+        callback?: Callback<Transaction[]>
+    ) => Promise<Transaction[]>
+
+    getAccountData: (
+        this: API,
+        seed: string,
+        options: GetAccountDataOptions,
+        callback?: Callback<AccountData>
+    ) => Promise<AccountData>
+
+    getBundle: (
+        this: API,
+        tailTransaction: string,
+        callback?: Callback<Bundle>
+    ) => Promise<Bundle>
+
+    getBundlesFromAddresses: (
+        this: API,
+        addresses: string[],
+        inclusionState?: boolean,
+        callback?: Callback<Bundle[]>
+    ) => Promise<Bundle[]>
+
+    getInputs: (
+        this: API,
+        seed: string,
+        options?: GetInputsOptions,
+        callback?: Callback
+    ) => Promise<Inputs>
+
+    getLatestInclusion: (
+        this: API,
+        transactions: string[],
+        callback?: Callback<boolean[]>
+    ) => Promise<boolean[]>
+
+    getNewAddress: (
+        this: API,
+        seed: string,
+        options: GetNewAddressOptions
+    ) => Promise<string[] | string>
+
+    getTransactionObjects: (
+        this: API,
+        transactions: string[],
+        callback?: Callback<Transaction[]>
+    ) => Promise<Transaction[]>
+
+    isPromotable: ( // Deprecated
+        this: API,
+        transactions: string | string[],
+        callback?: Callback<boolean>
+    ) => Promise<boolean>
+
+    promoteTransaction: (
+        this: API,
+        tailTransaction: string,
+        depth: number,
+        minWeightMagnitude: number,
+        transfers?: Transfer[],
+        options?: PromoteTransactionOptions,
+        callback?: Callback<Transaction[]>
+    ) => Promise<Transaction[]>
+
+    replaybundle: (
+        this: API,
+        tailTransaction: string,
+        depth: number,
+        minWeightMagnitude: number,
+        callback?: Callback<Bundle>
+    ) => Promise<Bundle>
+
+    sendTransfer: (
+        this: API,
+        seed: string,
+        depth: number,
+        minWeightMagnitude: number,
+        transfers: Transfer[],
+        options?: any,
+        callback?: Callback<Bundle>
+    ) => Promise<Bundle>
+
+    sendTrytes: (
+        this: API,
+        trytes: string[],
+        depth: number,
+        minWeightMagnitude: number,
+        options?: any,
+        callback?: Callback<Bundle>
+    ) => Promise<Bundle>
+
+    traverseBundle: (
+        this: API,
+        trunkTransaction: string,
+        bundleHash: string | null,
+        bundle: Bundle,
+        callback?: Callback<Bundle>
+    ) => Promise<Bundle>
+
+    storeAndBroadcast: (
+        this: API,
+        trytes: string[],
+        callback?: Callback<void>
+    ) => Promise<void>
+
     [key: string]: any
 }

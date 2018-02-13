@@ -1,3 +1,4 @@
+import { API, Callback } from '../types'
 /**
  *   Broadcasts and stores transaction trytes
  *
@@ -6,13 +7,18 @@
  *   @returns {function} callback
  *   @returns {object} success
  **/
-function storeAndBroadcast(trytes: string[], callback: Callback) {
-    this.storeTransactions(trytes, (error, success) => {
-        if (error) {
-            return callback(error)
-        }
+export default function storeAndBroadcast(
+    this: API,
+    trytes: string[],
+    callback?: Callback<void>
+): Promise<void> {
 
-        // If no error
-        return this.broadcastTransactions(trytes, callback)
-    })
+    const promise: Promise<void> = this.storeTransactions(trytes)
+        .then(() => this.broadcastTransactions(trytes, callback))
+
+    if (typeof callback === 'function') {
+        promise.then(callback.bind(null, null), callback)
+    }
+
+    return promise
 }

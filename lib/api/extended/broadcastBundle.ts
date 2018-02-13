@@ -1,28 +1,43 @@
+import errors from '../../errors'
+import { isHash,  transactionTrytes } from '../../utils'
+
+import { API, Bundle, Callback, Transaction } from '../types'
+
 /**
- *   Re-Broadcasts a transfer
+ *   Re-broadcasts a transfer by tail transaction
  *
  *   @method broadcastBundle
- *   @param {string} tail
- *   @param {function} callback
- *   @returns {object} analyzed Transaction objects
+ *   @param {string} tailTransaction
+ *   @param {function} [callback]
+ *   @returns {object} Transaction objects
  **/
-function broadcastBundle(tail: string, callback: Callback) {
-    // Check if correct tail hash
-    if (!inputValidator.isHash(tail)) {
-        return callback(errors.invalidTrytes())
-    }
+export default function broadcastBundle(
+  this: API,
+  tailTransaction: string,
+  callback: Callback<void>
+): Promise<void> | void {
 
-    this.getBundle(tail, (error, bundle) => {
-        if (error) {
-            return callback(error)
+    const promise: Promise<void> = new Promise((resolve, reject) => {
+        if (!isHash(tailTransaction)) {
+            return reject(errors.INVALID_TRYTES)
         }
 
-        // Get the trytes of all the bundle objects
-        const bundleTrytes: string[] = []
-        bundle!.forEach(bundleTx => {
-            bundleTrytes.push(Utils.transactionTrytes(bundleTx))
-        })
-
-        return this.broadcastTransactions(bundleTrytes.reverse(), callback)
+        resolve(
+            this.getBundle(tailTransaction)
+                .then((bundle: Bundle) =>
+                    this.broadcastTransactions(
+                        bundle
+                            .map((transaction: Transaction) => transactionTrytes(transaction))
+                            .reverse()
+                    )
+                )
+        )
     })
+
+    if (typeof callback === 'function') {
+        promise.then(callback.bind(null, null), callback)
+        return    
+    }
+
+    return promise
 }

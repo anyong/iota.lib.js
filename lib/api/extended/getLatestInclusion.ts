@@ -1,3 +1,5 @@
+import { API, Callback, GetNodeInfoResponse } from '../types'
+
 /**
  *   Wrapper function for getNodeInfo and getInclusionStates
  *
@@ -5,15 +7,25 @@
  *   @param {array} hashes
  *   @returns {function} callback
  *   @returns {object} success
- **/
-function getLatestInclusion(hashes: string[], callback: Callback) {
-    this.getNodeInfo((e, nodeInfo) => {
-        if (e) {
-            return callback(e)
-        }
+ */
+export default function getLatestInclusion(
+    this: API,
+    transactions: string[],
+    callback?: Callback<boolean[]>
+): Promise<boolean[]> {
 
-        const latestMilestone = nodeInfo.latestSolidSubtangleMilestone
+    // 1. Call getNodeInfo to get latest solid subtangle milestone
+    const promise: Promise<any> = this.getNodeInfo()
 
-        return this.getInclusionStates(hashes, Array(latestMilestone), callback)
-    })
+        // 2. Query for inclusion states based of that latest mileston
+        .then(nodeInfo => this.getInclusionStates(
+            transactions, 
+            [nodeInfo.latestSolidSubtangleMilestone]
+        ))
+  
+    if (typeof callback === 'function') {
+        promise.then(callback.bind(null, null), callback)
+    }
+
+    return promise 
 }
