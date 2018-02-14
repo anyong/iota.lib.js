@@ -1,4 +1,11 @@
-import { API, BaseCommand, BatchableCommand, batchableKeys, Callback, IRICommand } from '../types'
+import {
+    API,
+    BaseCommand,
+    BatchableCommand,
+    batchableKeys,
+    Callback,
+    IRICommand
+} from '../types'
 
 import { defaultSettings } from '../'
 import { batchedSend, send } from '../../utils/request'
@@ -16,7 +23,8 @@ const BATCH_SIZE = 1000
 export default function sendCommand<C extends BaseCommand, R = void>(
     this: API,
     command: C,
-    callback?: Callback): Promise<R> {
+    callback?: Callback
+): Promise<R> {
 
     const promise: Promise<R> = new Promise((resolve, reject) => {
         const settings = this.getSettings()

@@ -78,7 +78,7 @@ export default function getBundlesFromAddresses(
       // 4. If requested, add persistance status to each bundle 
       .then((bundles: Bundle[]) => inclusionStates
         ? this.getLatestInclusion(bundles.map((bundle: Bundle) => bundle[0].hash))
-            .then((states: boolean[]) => bundles
+            .then((states: boolean[]): Bundle[] => bundles
                 .map((bundle: Bundle, i: number) => bundle
                     .map(transaction => ({
                         ...transaction,

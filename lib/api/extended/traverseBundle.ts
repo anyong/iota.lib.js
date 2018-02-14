@@ -1,6 +1,6 @@
 import { transactionObject } from '../../utils'
 
-import { API, Bundle, Callback, Transaction } from  '../types'
+import { API, Bundle, Callback } from  '../types'
 
 /**
  *   Basically traverse the Bundle by going down the trunkTransactions until
@@ -18,19 +18,19 @@ export default function traverseBundle(
     trunkTransaction: string,
     bundleHash: string | null,
     bundle: Bundle,
-    callback?: Callback<Bundle>
-): Promise<Bundle> {
+    callback?: Callback<Bundle | void>
+): Promise<Bundle | void> {
 
-    const promise: Promise<Bundle> = new Promise((resolve, reject) => {
+    const promise: Promise<Bundle | void> = new Promise((resolve, reject) => {
         // Get trytes of transaction hash
         this.getTrytes([trunkTransaction])
-            .then((trytes: string[]) => {
+            .then((trytes: string[]): Bundle | void | Promise<Bundle | void> => {
                 if (!trytes) {
                     return reject('Bundle transactions not visible')
                 }
 
                 // get the transaction object
-                const transaction: Transaction = transactionObject(trytes[0]) 
+                const transaction = transactionObject(trytes[0]) 
 
                 if (!transaction) {
                     return reject('Invalid trytes, could not create object')

@@ -13,18 +13,18 @@ import { API, Bundle, Callback, Transaction } from '../types'
 export default function getBundle(
     this: API,
     tailTransaction: string,
-    callback?: Callback<Bundle[]>
-): Promise<Bundle> {
+    callback?: Callback<Bundle[] | void>
+): Promise<Bundle | void> {
 
-    const promise: Promise<Bundle> = new Promise((resolve, reject) => {
+    const promise: Promise<Bundle | void> = new Promise((resolve, reject) => {
         if (!isHash(tailTransaction)) {
             return reject(errors.INVALID_INPUTS)
         }
 
         resolve(
             this.traverseBundle(tailTransaction, null, [])
-                .then((bundle: Bundle) => {
-                    if (!isBundle(bundle)) {
+            .then((bundle: Bundle | void) => {
+                    if (bundle && !isBundle(bundle)) {
                         return reject(errors.INVALID_BUNDLE)
                     }
                     resolve(bundle)

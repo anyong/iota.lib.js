@@ -50,7 +50,7 @@ export default function sendTrytes(
                 ))
 
                 // 3. Broadcast and store transactions
-                .then((attachedTrytes: string[]) => this.storeAndBroadcast(attachedTrytes)
+                .then(attachedTrytes => this.storeAndBroadcast(attachedTrytes)
                     .then(() => attachedTrytes
                         .map(tryteString => transactionObject(tryteString))
                     )

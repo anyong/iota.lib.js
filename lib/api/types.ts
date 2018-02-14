@@ -134,10 +134,14 @@ export type BatchableCommand =
     | GetInclusionStatesCommand
     | GetTrytesCommand
 
+export interface BatchableKeys {
+    [key: string]: string[]
+}
+
 /**
  * Batchable keys for each command
  */
-export const batchableKeys = {
+export const batchableKeys: BatchableKeys = {
     [IRICommand.FIND_TRANSACTIONS]: ['addresses', 'approvees', 'bundles', 'tags'] as Array<keyof FindTransactionsCommand>,
     [IRICommand.GET_BALANCES]: ['addresses'] as Array<keyof GetBalancesCommand>,
     [IRICommand.GET_INCLUSION_STATES]: ['tips', 'transactions'] as Array<keyof GetInclusionStatesCommand>,
@@ -194,8 +198,8 @@ export interface API {
         branchTransaction: string,
         minWeightMagnitude: number,
         trytes: string[],
-        callback?: Callback<string[] | void>
-    ) => Promise<string[] | void>
+        callback?: Callback<string[]>
+    ) => Promise<string[]>
 
     findTransactions: (
         this: API,
@@ -309,8 +313,8 @@ export interface API {
     getBundle: (
         this: API,
         tailTransaction: string,
-        callback?: Callback<Bundle>
-    ) => Promise<Bundle>
+        callback?: Callback<Bundle | void>
+    ) => Promise<Bundle | void>
 
     getBundlesFromAddresses: (
         this: API,
@@ -392,8 +396,8 @@ export interface API {
         trunkTransaction: string,
         bundleHash: string | null,
         bundle: Bundle,
-        callback?: Callback<Bundle>
-    ) => Promise<Bundle>
+        callback?: Callback<Bundle | void>
+    ) => Promise<Bundle | void>
 
     storeAndBroadcast: (
         this: API,
