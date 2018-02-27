@@ -1,28 +1,32 @@
 import {
-    FindTransactionsCommand, FindTransactionsQuery,
-    GetBalancesCommand, GetBalancesResponse,
+    FindTransactionsCommand,
+    FindTransactionsQuery,
+    GetBalancesCommand,
+    GetBalancesResponse,
     GetInclusionStatesCommand,
     GetNeighborsResponse,
     GetNodeInfoResponse,
     GetTransactionsToApproveResponse,
     GetTrytesCommand,
+    NormalizedGetBalancesResponse
 } from './core'
 
 import {
-    AccountData, GetAccountDataOptions,
+    AccountData,
+    GetAccountDataOptions,
     GetInputsOptions,
     GetNewAddressOptions,
     GetTransfersOptions,
     Inputs,
+    NormalizedInputs,
     PromoteTransactionOptions
 } from './extended'
 
-/**
- * Export types of public API properties
- */
 export {
-    FindTransactionsCommand, FindTransactionsQuery,
-    GetBalancesCommand, GetBalancesResponse,
+    FindTransactionsCommand,
+    FindTransactionsQuery,
+    GetBalancesCommand,
+    GetBalancesResponse,
     GetInclusionStatesCommand,
     GetNeighborsResponse,
     GetNodeInfoResponse,
@@ -31,28 +35,39 @@ export {
 } from './core'
 
 export {
-    AccountData, GetAccountDataOptions,
+    AccountData,
+    GetAccountDataOptions,
     GetInputsOptions,
     GetNewAddressOptions,
     GetTransfersOptions,
     Inputs,
+    NormalizedInputs,
     PromoteTransactionOptions
 } from './extended'
 
-
-/** 
- * Input type 
- */
-export interface Input {
-    balance?: number
-    security: number
-    keyIndex: number
-    address: string
+export interface Normalized<T> {
+    [key: string]: T
 }
 
-/** 
- * Transfer object 
- */
+/* Address object */
+export interface Address extends Balance, SpentStatus {
+    address: string,
+    keyIndex: number,
+    security: number,
+}
+
+export interface SpentStatus {
+    spent: boolean
+}
+
+export interface Balance {
+    balance: string 
+}
+
+/* Normalized addresses */
+export type Addresses = Normalized<Address>
+
+/* Transfer object */
 export interface Transfer {
     address: string
     value: number
@@ -61,9 +76,7 @@ export interface Transfer {
     obsoleteTag?: string
 }
 
-/** 
- * Transaction object 
- */
+/* Transaction object */
 export interface Transaction {
     hash: string
     signatureMessageFragment: string
@@ -83,14 +96,10 @@ export interface Transaction {
     nonce: string
 }
 
-/**
- * Bundle object
- */
+/* Bundle object */
 export type Bundle = Transaction[]
 
-/**
- * Neighbor object 
- */
+/* Neighbor object */
 export interface Neighbor {
     address: string,
     numberOfAllTransactions: number,
@@ -98,14 +107,10 @@ export interface Neighbor {
     numberOfNewTransactions: number
 }
 
-/**
- * List of Neighbors object, returned by `getNeighbors()`
- */
+/* List of Neighbors object, returned by `getNeighbors()` */
 export type Neighbors = Neighbor[]
 
-/**
- * List of IRI Commands
- */
+/* List of IRI Commands */
 export enum IRICommand {
     GET_NODE_INFO = 'getNodeInfo',
     GET_NEIGHBORS = 'getNeighbors',
@@ -125,22 +130,19 @@ export enum IRICommand {
     WERE_ADDRESSES_SPENT_FROM = 'wereAddressesSpentFrom'
 }
 
-/**
- * Known batchable commands
- */
+/* Known batchable commands */
 export type BatchableCommand =
     | FindTransactionsCommand
     | GetBalancesCommand
     | GetInclusionStatesCommand
     | GetTrytesCommand
 
+/* Keys to batch object */
 export interface BatchableKeys {
     [key: string]: string[]
 }
 
-/**
- * Batchable keys for each command
- */
+/** Batchable keys for each command */
 export const batchableKeys: BatchableKeys = {
     [IRICommand.FIND_TRANSACTIONS]: ['addresses', 'approvees', 'bundles', 'tags'] as Array<keyof FindTransactionsCommand>,
     [IRICommand.GET_BALANCES]: ['addresses'] as Array<keyof GetBalancesCommand>,
@@ -148,33 +150,22 @@ export const batchableKeys: BatchableKeys = {
     [IRICommand.GET_TRYTES]: ['hashes'] as Array<keyof GetTrytesCommand>,
 }
 
-/**
- * IRI Command objects extend from this interface
- */
+/* IRI Command objects extend from this interface */
 export interface BaseCommand {
-    command: IRICommand,
-    [key: string]: any
+    command: string,
+    [key: string]: string[] | number[] | boolean[] | string | number | boolean
 }
 
-/**
- * Connection settings object
- */
+/* Connection settings object */
 export interface Settings {
-    provider: string
-    token?: string // -> sandboxToken
-    host?: string // deprecate
-    port?: number // deprecate
-    sandbox?: boolean // deprecate
+    provider?: string
+    normalizeOutput?: boolean
 }
 
-/**
- * Callback
- */
+/* Callback */
 export type Callback<R = any> = (err: Error | null, res?: R) => void
 
-/**
- * API, Core + Extended
- */
+/* API, Core + Extended */
 export interface API {
     /**
      * API util methods

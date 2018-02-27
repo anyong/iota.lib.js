@@ -4,7 +4,8 @@ import {
     BatchableCommand,
     batchableKeys,
     Callback,
-    IRICommand
+    IRICommand,
+    Settings
 } from '../types'
 
 import { defaultSettings } from '../'
@@ -20,23 +21,20 @@ const BATCH_SIZE = 1000
  *   @param {function} callback
  *   @returns {object} success
  **/
-export default function sendCommand<C extends BaseCommand, R = void>(
-    this: API,
+export const sendCommand = <C extends BaseCommand, R>(provider: string) => (
     command: C,
+    settings: Settings = defaultSettings,
     callback?: Callback
-): Promise<R> {
+): Promise<R> => {
 
     const promise: Promise<R> = new Promise((resolve, reject) => {
-        const settings = this.getSettings()
-        const provider = settings.provider || defaultSettings.provider
-        const token = settings.token
         const keysToBatch: string[] = getKeysToBatch<C, keyof C[]>(command, BATCH_SIZE)
 
         if (keysToBatch.length) {
-            return resolve(batchedSend(command, { provider, token }, keysToBatch, BATCH_SIZE))
+            return resolve(batchedSend(command, { provider }, keysToBatch, BATCH_SIZE))
         }
 
-        resolve(send(command, { provider, token }))
+        resolve(send(command, { provider }))
     })
 
     if (typeof callback === 'function') {

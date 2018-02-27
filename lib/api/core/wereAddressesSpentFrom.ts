@@ -1,49 +1,52 @@
 import errors from '../../errors'
 import { isAddress, noChecksum } from '../../utils'
 
-import { API, BaseCommand, Callback, IRICommand } from '../types'
+import { Address, Addresses, BaseCommand, Callback, IRICommand, Normalized, Settings } from '../types'
+
+import { sendCommand } from '../core/sendCommand'
+
+import { invokeCallback, isAddresses, keys, normalize, removeChecksum } from '../utils'
 
 export interface WereAddressesSpentFromCommand extends BaseCommand {
-    command: IRICommand.CHECK_CONSISTENCY
-    tails: string[]
+    command: string
+    addresses: string[]
 }
 
 export interface WereAddressesSpentFromResponse {
     states: boolean[]
 }
 
-export default function wereAddressesSpentFrom (
-    this: API,
-    addresses: string[] | string,
+export const makeWereAddressesSpentFromCommand = (addresses: string[]) => ({
+    command: 'wereAddressesSpentFrom',
+    addresses
+})
+
+export const normalizeSpentStates = (addresses: string[]) =>
+    normalize<boolean, Normalized<boolean>>(addresses, (address, spent) => ({
+        [address]: { spent }
+    }))
+
+export const formatWereAddressesSpentFromResponse = (addresses: string[], normalizeOutput: boolean = true) =>
+    (res: WereAddressesSpentFromResponse): Normalized<{[key: string]: boolean}> | boolean[] =>
+        normalizeOutput
+            ? normalizeSpentStates(addresses)(res.states)
+            : res.states 
+
+export const wereAddressesSpentFrom = ({
+    provider,
+    normalizeOutput = true
+}: Settings = {}) => (
+    addresses: string[] | Addresses,
     callback?: Callback<boolean[]>
-): Promise<boolean[]> {
-        
-    const promise: Promise<boolean[]> = new Promise((resolve, reject) => {
-        if (!Array.isArray(addresses)) {
-            addresses = [addresses]
-        }
-        
-        if (addresses.some(address => !isAddress(address))) {
-            return reject(new Error(errors.INVALID_TRYTES))
-        }
-
-        addresses = addresses.map(address => noChecksum(address))
-
-        resolve(
-            this.sendCommand<WereAddressesSpentFromCommand, WereAddressesSpentFromResponse>(
-                {
-                    command: IRICommand.WERE_ADDRESSES_SPENT_FROM,
-                    addresses 
-                }  
-            )
-              .then(res => res.states)
+): Promise<boolean[] | Normalized<boolean>> =>
+    Promise.resolve(
+        isAddresses(addresses) 
+    )
+        .then(() => keys(addresses))
+        .then(removeChecksum)
+        .then((addressesArray) => Promise.resolve(
+            makeWereAddressesSpentFromCommand(addressesArray)
         )
-    })
-
-    if (typeof callback === 'function') {
-        promise.then(callback.bind(null, null), callback)
-    }
-
-    return promise
-}
-
+            .then(sendCommand<WereAddressesSpentFromCommand, WereAddressesSpentFromResponse>(provider))
+            .then(formatWereAddressesSpentFromResponse(addressesArray))
+            .then(invokeCallback(callback)))

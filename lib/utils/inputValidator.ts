@@ -1,105 +1,56 @@
-import { Input, Transaction, Transfer } from '../api/types'
+import { Input, Transaction, Transfer, GetInputsOptions } from '../api/types'
 
 export const isArray = Array.isArray // Deprecate
 
 export const isValue = Number.isInteger // Deprecate
 
-/**
- *   checks if input is correct address
- *
- *   @method isAddress
- *   @param {string} address
- *   @returns {boolean}
- **/
-export const isAddress = (address: string): boolean => isHash(address) // Deprecate
+/* Checks if input is correct address */
+export const isAddress = (
+  address: string
+): boolean => isHash(address) // Deprecate
 
 /**
- *   checks if input is correct trytes consisting of A-Z9
- *   optionally validate length
- *
- *   @method isTrytes
- *   @param {string} trytes
- *   @param {integer} length optional
- *   @returns {boolean}
- **/
+ * Checks if input is correct trytes consisting of A-Z9
+ * optionally validate length
+ */
 export const isTrytes = (trytes: string, length: number = 0): boolean =>
     typeof trytes === 'string' && new RegExp(`^[9A-Z]{${length}}$`).test(trytes)
 
 /**
- *   checks if input is correct trytes consisting of A-Z9
- *   optionally validate length
- *
- *   @method isNinesTrytes
- *   @param {string} trytes
- *   @returns {boolean}
- **/
+ * Checks if input is correct trytes consisting of A-Z9
+ * optionally validate length
+ */
 export const isNinesTrytes = (trytes: string): boolean => // Deprecate
     typeof trytes === 'string' && /^[9]+$/.test(trytes)
 
-/**
- *   checks if input is correct hash (81 trytes)
- *
- *   @method isHash
- *   @param {string} hash
- *   @returns {boolean}
- **/
+/* Checks if input is correct hash (81 trytes) */
 export const isHash = (hash: string): boolean => isTrytes(hash, 81)
 
-/**
- *   checks if input is correct hash
- *
- *   @method isTransfersArray
- *   @param {array} hash
- *   @returns {boolean}
- **/
+/* Checks if input is correct hash */
 export const isTransfersArray = (transfers: Transfer[]): boolean =>
     Array.isArray(transfers) &&
     transfers.every(tx =>
         isAddress(tx.address) &&
         Number.isInteger(tx.value) &&
         isTrytes(tx.message, 0) &&
-        isTrytes(tx.tag || tx.obsoleteTag, 27))
+        isTrytes((tx.tag || tx.obsoleteTag) as string, 27))
 
-/**
- *   checks if input is list of correct trytes
- *
- *   @method isArrayOfHashes
- *   @param {list} hashesArray
- *   @returns {boolean}
- **/
+/* Checks if input is list of correct trytes */
 export const isArrayOfHashes = (hashes: string[]): boolean =>
     Array.isArray(hashes) &&
     hashes.every(hash => isHash(hash))
 
-/**
- *   checks if input is list of correct trytes
- *
- *   @method isArrayOfTrytes
- *   @param {list} trytesArray
- *   @returns {boolean}
- **/
+/* Checks if input is list of correct trytes */
 export const isArrayOfTrytes = (trytesArray: string[]): boolean =>
     Array.isArray(trytesArray) && trytesArray.every(trytes => isTrytes(trytes, 2673))
 
-/**
- *   checks if attached trytes if last 241 trytes are non-zero
- *
- *   @method isArrayOfAttachedTrytes
- *   @param {array} trytesArray
- *   @returns {boolean}
- **/
- export const isArrayOfAttachedTrytes = (trytesArray: string[]): boolean =>
+/* Checks if attached trytes if last 241 trytes are non-zero */
+export const isArrayOfAttachedTrytes = (trytesArray: string[]): boolean =>
     Array.isArray(trytesArray) &&
     trytesArray.length > 0 &&
     trytesArray.every(trytes => isTrytes(trytes, 2673) && /^[9]+$/.test(trytes.slice(2673 - 3 * 81)))
 
-/**
- *   checks if correct bundle with transaction object
- *
- *   @method isArrayOfTxObjects
- *   @param {array} bundle
- *   @returns {boolean}
- **/
+/* Checks if correct bundle with transaction object */
 export const isArrayOfTxObjects = (bundle: Transaction[]): boolean =>
     isArray(bundle) &&
     bundle.length > 0 && 
@@ -121,13 +72,7 @@ export const isArrayOfTxObjects = (bundle: Transaction[]): boolean =>
         Number.isInteger(tx.attachmentTimestampUpperBound) &&
         isTrytes(tx.nonce, 27))
 
-/**
- *   checks if correct inputs list
- *
- *   @method isInputs
- *   @param {array} inputs
- *   @returns {boolean}
- **/
+/* Checks if correct inputs list */
 export const isInputs = (inputs: Input[]): boolean =>
     Array.isArray(inputs) &&
     inputs.length > 0 &&
@@ -137,19 +82,15 @@ export const isInputs = (inputs: Input[]): boolean =>
         Number.isInteger(input.keyIndex) && input.keyIndex > -1)
 
 /**
- *   Checks that a given uri is valid
+ * Checks that a given uri is valid
  *
- *   Valid Examples:
- *   udp://[2001:db8:a0b:12f0::1]:14265
- *   udp://[2001:db8:a0b:12f0::1]
- *   udp://8.8.8.8:14265
- *   udp://domain.com
- *   udp://domain2.com:14265
- *
- *   @method isUri
- *   @param {string} node
- *   @returns {bool} valid
- **/
+ * Valid Examples:
+ * udp://[2001:db8:a0b:12f0::1]:14265
+ * udp://[2001:db8:a0b:12f0::1]
+ * udp://8.8.8.8:14265
+ * udp://domain.com
+ * udp://domain2.com:14265
+ */
 export const isUri = (uri: string): boolean => {
     const getInside = /^(udp|tcp):\/\/([\[][^\]\.]*[\]]|[^\[\]:]*)[:]{0,1}([0-9]{1,}$|$)/i
 
@@ -159,3 +100,7 @@ export const isUri = (uri: string): boolean => {
 
     return getInside.test(uri) && uriTest.test(stripBrackets.exec(getInside.exec(uri)![1])![1])
 }
+
+/* Check if start & end options are valid */
+export const isValidStartEndOptions = ({ start, end }: GetInputsOptions = {}): boolean =>
+    !!(end && (start > end || end > start + 500))

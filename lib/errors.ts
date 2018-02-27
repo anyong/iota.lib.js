@@ -17,7 +17,14 @@ export default {
   /**
    * @constant {string} INVALID_SEED - Invalid seed
    */
+
   INVALID_SEED: 'Invalid seed',
+
+  INVALID_START_OPTION: 'Invalid start option',
+
+  INVALID_START_END_OPTIONS: 'Invalid end option',
+
+  INVALID_SECURITY_OPTION: 'Invalid security option',
 
   /**
    * @constant {string} INVALID_INDEX - Invalid index
@@ -68,6 +75,12 @@ export default {
    * @constant {string} INVALID_INPUTS - Invalid inputs
    */
   INVALID_INPUTS: 'Invalid inputs',
+
+  INVALID_ADDRESS: 'Invalid address',
+
+  INVALID_ADDRESSES: 'Invalid addresses',
+
+  INVALID_THRESHOLD: 'Invalid threshold option',
 
   /**
    * @constant {string} INVALID_COMMAND - Invalid command format

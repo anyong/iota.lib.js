@@ -1,9 +1,9 @@
 import { composeApi } from './api'
 import { API, Settings } from './api/types'
-import errors from './errors/inputErrors'
+import errors from './errors'
 import multisig from './multisig/multisig'
-import { default as valid } from './utils/inputValidator'
-import utils from './utils/utils'
+import { * as valid } from './valid'
+import utils from './utils'
 
 //
 //  * Depreactions are aimed for v1.0.0

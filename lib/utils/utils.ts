@@ -153,12 +153,8 @@ export function noChecksum(address: string | string[]) {
  *   @param {string} addressWithChecksum
  *   @returns {bool}
  **/
-export function isValidChecksum(addressWithChecksum: string) {
-    const addressWithoutChecksum = noChecksum(addressWithChecksum)
-    const newChecksum = addChecksum(addressWithoutChecksum)
-
-    return newChecksum === addressWithChecksum
-}
+export const isValidChecksum = (addressWithChecksum: string): boolean =>
+  addressWithChecksum === addChecksum(noChecksum(addressWithChecksum))
 
 /**
  *   Converts transaction trytes of 2673 trytes into a transaction object
